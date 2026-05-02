@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#19352d" />
+  <meta name="description" content="Hosted personal financial portal for income, expenses, debts, bank balances, and micro-lending tracking." />
+  <title>TUMELO UTLWANANG BOJOSI LIVE FINACIAL PORTFOLIO</title>
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell app-shell" id="appShell">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Personal Finance</p>
+        <h1>TUMELO UTLWANANG BOJOSI LIVE FINACIAL PORTFOLIO</h1>
+        <p class="sidebar-copy">
+          Track every pula you earn and every pula you spend in one living portfolio.
+        </p>
+      </div>
+
+      <div class="sidebar-card">
+        <p class="sidebar-label">Current Balance</p>
+        <h2 id="currentBalance">P0.00</h2>
+        <p id="balanceNote" class="sidebar-note">No transactions recorded yet.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <p class="sidebar-label">Bank Total</p>
+        <h2 id="bankTotal">P0.00</h2>
+        <p class="sidebar-note">Combined live balances across your linked accounts.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <p class="sidebar-label">Quick Tips</p>
+        <ul class="tip-list">
+          <li>Add all income and expenses as transactions.</li>
+          <li>Use categories to spot spending habits quickly.</li>
+          <li>Export your data regularly as a backup.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Portfolio Dashboard</p>
+          <h2>the first million is the hardest</h2>
+          <p class="hero-copy">This time next year we will be millioners</p>
+        </div>
+        <div class="hero-actions">
+          <button id="seedDemoBtn" class="ghost-button" type="button">Load Demo Data</button>
+          <button id="exportStatementBtn" class="ghost-button" type="button">Export Statement</button>
+          <button id="exportBtn" class="ghost-button" type="button">Export JSON</button>
+          <button id="collapseAllBtn" class="ghost-button" type="button">Minimize All</button>
+          <button id="expandAllBtn" class="ghost-button" type="button">Expand All</button>
+          <label class="ghost-button file-button" for="importFile">Import JSON</label>
+          <input id="importFile" type="file" accept=".json" hidden />
+        </div>
+      </section>
+
+      <section class="kpi-grid">
+        <article class="kpi-card">
+          <p>Total Income</p>
+          <strong id="totalIncome">P0.00</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Total Spending</p>
+          <strong id="totalExpense">P0.00</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Net Savings</p>
+          <strong id="netSavings">P0.00</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Transactions</p>
+          <strong id="transactionCount">0</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Universal Total</p>
+          <strong id="universalTotal">P0.00</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Bank Accounts Total</p>
+          <strong id="bankAccountsTotal">P0.00</strong>
+        </article>
+        <article class="kpi-card">
+          <p>Total Debt Outstanding</p>
+          <strong id="totalDebtOutstanding">P0.00</strong>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel form-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Record Entry</p>
+              <h3>Add income or spending</h3>
+            </div>
+          </div>
+          <form id="transactionForm" class="transaction-form">
+            <label>
+              Type
+              <select id="type" required>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </label>
+            <label>
+              Amount (Pula)
+              <input id="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+            </label>
+            <label>
+              Category
+              <input id="category" type="text" placeholder="Salary, Food, Transport..." required />
+            </label>
+            <label>
+              Date
+              <input id="date" type="date" required />
+            </label>
+            <label class="full-width">
+              Description
+              <input id="description" type="text" placeholder="What was this money for?" required />
+            </label>
+            <div id="duplicateHint" class="inline-note hidden full-width"></div>
+            <button class="primary-button full-width" type="submit">Save Transaction</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Insights</p>
+              <h3>Spending breakdown</h3>
+            </div>
+          </div>
+          <div id="categorySummary" class="summary-list empty-state">No spending categories yet.</div>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Masked Card Profiles</p>
+              <h3>Safe bank card references</h3>
+            </div>
+          </div>
+          <p class="panel-note">For safety, this portfolio stores only masked card details such as bank, label, and last 4 digits. Full card numbers and CVV are intentionally never stored here.</p>
+          <form id="cardForm" class="transaction-form">
+            <label>
+              Card Label
+              <input id="cardLabel" type="text" placeholder="Main debit card" required />
+            </label>
+            <label>
+              Bank
+              <input id="cardBank" type="text" placeholder="FNB Botswana" required />
+            </label>
+            <label>
+              Last 4 Digits
+              <input id="cardLast4" type="text" inputmode="numeric" maxlength="4" placeholder="1234" required />
+            </label>
+            <label>
+              Network
+              <select id="cardNetwork" required>
+                <option value="Visa">Visa</option>
+                <option value="Mastercard">Mastercard</option>
+                <option value="Verve">Verve</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label class="full-width">
+              Notes
+              <input id="cardNotes" type="text" placeholder="Linked account or spending purpose" />
+            </label>
+            <button class="primary-button full-width" type="submit">Save Masked Card Profile</button>
+          </form>
+          <div id="cardList" class="summary-list bank-summary empty-state">No masked card profiles yet.</div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Quick Entries</p>
+              <h3>Most entered transactions</h3>
+            </div>
+          </div>
+          <div id="quickTemplates" class="chip-list empty-state">Your common transactions will appear here.</div>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Bank Balances</p>
+              <h3>Real-time balances for 3 accounts</h3>
+            </div>
+          </div>
+          <form id="bankForm" class="bank-grid">
+            <label>
+              Account 1 Name
+              <input id="bankName1" type="text" placeholder="FNB Main" />
+            </label>
+            <label>
+              Account 1 Balance
+              <input id="bankBalance1" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+            <label>
+              Account 2 Name
+              <input id="bankName2" type="text" placeholder="Orange Money" />
+            </label>
+            <label>
+              Account 2 Balance
+              <input id="bankBalance2" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+            <label>
+              Account 3 Name
+              <input id="bankName3" type="text" placeholder="Savings" />
+            </label>
+            <label>
+              Account 3 Balance
+              <input id="bankBalance3" type="number" step="0.01" min="0" placeholder="0.00" />
+            </label>
+            <button class="primary-button full-width" type="submit">Save Bank Balances</button>
+          </form>
+          <div id="bankAccountsSummary" class="summary-list bank-summary"></div>
+        </article>
+
+        <article class="panel form-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Personal Debt</p>
+              <h3>Debt entries with interest</h3>
+            </div>
+          </div>
+          <form id="debtForm" class="transaction-form">
+            <label>
+              Creditor
+              <input id="debtCreditor" type="text" placeholder="Bank, friend, shop..." required />
+            </label>
+            <label>
+              Principal Amount
+              <input id="debtPrincipal" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+            </label>
+            <label>
+              Interest Rate (%)
+              <input id="debtInterestRate" type="number" min="0" step="0.01" placeholder="0.00" />
+            </label>
+            <div class="full-width">
+              <p class="mini-label">Quick interest choices</p>
+              <div class="chip-list compact-chips">
+                <button class="chip-button" type="button" data-debt-interest="0">0%</button>
+                <button class="chip-button" type="button" data-debt-interest="5">5%</button>
+                <button class="chip-button" type="button" data-debt-interest="10">10%</button>
+                <button class="chip-button" type="button" data-debt-interest="20">20%</button>
+                <button class="chip-button" type="button" data-debt-interest="30">30%</button>
+              </div>
+            </div>
+            <label>
+              Due Date
+              <input id="debtDueDate" type="date" required />
+            </label>
+            <label>
+              Amount Paid
+              <input id="debtAmountPaid" type="number" min="0" step="0.01" placeholder="0.00" value="0" />
+            </label>
+            <label>
+              Type
+              <select id="debtType" required>
+                <option value="loan">Loan</option>
+                <option value="credit">Credit</option>
+                <option value="borrowed">Borrowed Money</option>
+              </select>
+            </label>
+            <label class="full-width">
+              Notes
+              <input id="debtNotes" type="text" placeholder="Interest terms, payment plan, extra notes" />
+            </label>
+            <div class="full-width debt-preview-card">
+              <div class="summary-item">
+                <span>Interest Amount</span>
+                <strong id="debtPreviewInterest">P0.00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Total Due</span>
+                <strong id="debtPreviewTotalDue">P0.00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Outstanding Balance</span>
+                <strong id="debtPreviewOutstanding">P0.00</strong>
+              </div>
+              <div class="debt-progress-wrap">
+                <div class="debt-progress-meta">
+                  <span id="debtPreviewStatus">Awaiting debt values</span>
+                  <span id="debtPreviewPercent">0%</span>
+                </div>
+                <div class="debt-progress-track">
+                  <div id="debtPreviewBar" class="debt-progress-bar"></div>
+                </div>
+              </div>
+            </div>
+            <button class="primary-button full-width" type="submit">Save Debt Entry</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Ledger</p>
+              <h3>Transaction history</h3>
+            </div>
+            <div class="ledger-filters">
+              <select id="filterType">
+                <option value="all">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expenses</option>
+              </select>
+              <input id="searchInput" type="text" placeholder="Search description or category" />
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTableBody">
+                <tr><td colspan="6" class="empty-row">No transactions yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Monthly View</p>
+              <h3>Month-by-month portfolio</h3>
+            </div>
+          </div>
+          <div id="monthlySummary" class="summary-list empty-state">Your monthly summary will appear once you start adding entries.</div>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Debt Totals</p>
+              <h3>What you owe</h3>
+            </div>
+          </div>
+          <div class="summary-list">
+            <div class="summary-item"><span>Total Principal</span><strong id="debtPrincipalTotal">P0.00</strong></div>
+            <div class="summary-item"><span>Total Interest</span><strong id="debtInterestTotal">P0.00</strong></div>
+            <div class="summary-item"><span>Total Debt Due</span><strong id="debtTotalDue">P0.00</strong></div>
+            <div class="summary-item"><span>Total Paid</span><strong id="debtTotalPaid">P0.00</strong></div>
+            <div class="summary-item"><span>Outstanding</span><strong id="debtOutstanding">P0.00</strong></div>
+          </div>
+        </article>
+
+        <article class="panel form-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Live Investments</p>
+              <h3>Micro-lending business entries</h3>
+            </div>
+          </div>
+          <form id="investmentForm" class="transaction-form">
+            <label>
+              Date
+              <input id="investmentDate" type="date" required />
+            </label>
+            <label>
+              Borrower / Deal
+              <input id="investmentName" type="text" placeholder="Borrower or deal name" required />
+            </label>
+            <label>
+              Amount Invested
+              <input id="investmentAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+            </label>
+            <div class="full-width">
+              <p class="mini-label">Interest percentage</p>
+              <div class="chip-list compact-chips">
+                <button class="chip-button" type="button" data-investment-rate="20">20%</button>
+                <button class="chip-button" type="button" data-investment-rate="25">25%</button>
+                <button class="chip-button" type="button" data-investment-rate="30">30%</button>
+              </div>
+            </div>
+            <label>
+              Interest Rate (%)
+              <input id="investmentRate" type="number" min="0" step="0.01" placeholder="20, 25 or 30" required />
+            </label>
+            <label>
+              Expected Amount Back
+              <input id="investmentExpected" type="number" min="0" step="0.01" placeholder="0.00" readonly required />
+            </label>
+            <label>
+              Amount Received
+              <input id="investmentReceived" type="number" min="0" step="0.01" placeholder="0.00" value="0" required />
+            </label>
+            <label>
+              Losses
+              <input id="investmentLoss" type="number" min="0" step="0.01" placeholder="0.00" value="0" required />
+            </label>
+            <label class="full-width">
+              Notes
+              <input id="investmentNotes" type="text" placeholder="Status, comments, follow-up notes" required />
+            </label>
+            <div class="full-width debt-preview-card">
+              <div class="summary-item">
+                <span>Interest Amount</span>
+                <strong id="investmentPreviewInterest">P0.00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Expected Amount Back</span>
+                <strong id="investmentPreviewExpected">P0.00</strong>
+              </div>
+            </div>
+            <button class="primary-button full-width" type="submit">Save Investment Entry</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Debt Ledger</p>
+              <h3>Debt history</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Due Date</th>
+                  <th>Creditor</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>Total Due</th>
+                  <th>Paid</th>
+                  <th>Outstanding</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="debtTableBody">
+                <tr><td colspan="8" class="empty-row">No debt entries yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Investment Totals</p>
+              <h3>Live lending overview</h3>
+            </div>
+          </div>
+          <div class="summary-list">
+            <div class="summary-item"><span>Total Invested</span><strong id="totalInvested">P0.00</strong></div>
+            <div class="summary-item"><span>Total Expected Back</span><strong id="totalExpected">P0.00</strong></div>
+            <div class="summary-item"><span>Total Received</span><strong id="totalReceived">P0.00</strong></div>
+            <div class="summary-item"><span>Total Losses</span><strong id="totalLosses">P0.00</strong></div>
+            <div class="summary-item"><span>Investment Profit</span><strong id="investmentProfit">P0.00</strong></div>
+            <div class="summary-item"><span>Still Expected</span><strong id="stillExpected">P0.00</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Investment Ledger</p>
+              <h3>Micro-lending history</h3>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Borrower / Deal</th>
+                  <th>Invested</th>
+                  <th>Expected</th>
+                  <th>Received</th>
+                  <th>Losses</th>
+                  <th>Profit</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="investmentTableBody">
+                <tr><td colspan="8" class="empty-row">No investment entries yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Live Graph</p>
+              <h3>Monthly money movement</h3>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-legend">
+              <span><i class="legend-swatch legend-income"></i> Personal Net</span>
+              <span><i class="legend-swatch legend-investment"></i> Investment Profit</span>
+              <span><i class="legend-swatch legend-debt"></i> Debt Outstanding</span>
+            </div>
+            <div id="chartEmpty" class="empty-state">The graph will appear after you add entries.</div>
+            <svg id="portfolioChart" viewBox="0 0 760 320" preserveAspectRatio="none" aria-label="Portfolio graph"></svg>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid lower-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Asset Conversion</p>
+              <h3>Total assets in USD</h3>
+            </div>
+          </div>
+          <div class="summary-list">
+            <div class="summary-item">
+              <span>Total Assets (BWP)</span>
+              <strong id="totalAssetsBwp">P0.00</strong>
+            </div>
+            <div class="summary-item">
+              <span>Total Assets ($)</span>
+              <strong id="totalAssets">$0.00</strong>
+            </div>
+            <div class="summary-item">
+              <span>Exchange Rate Used</span>
+              <strong id="exchangeRateLabel">1 BWP = $0.000000</strong>
+            </div>
+          </div>
+          <p class="panel-note" id="exchangeRateNote">Exchange rate reference will appear here.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

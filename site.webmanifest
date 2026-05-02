@@ -1,0 +1,10 @@
+{
+  "name": "TUMELO UTLWANANG BOJOSI LIVE FINACIAL PORTFOLIO",
+  "short_name": "Tumelo Portal",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5efe4",
+  "theme_color": "#19352d",
+  "description": "Hosted personal finance portal for spending, income, debts, and investments.",
+  "icons": []
+}
